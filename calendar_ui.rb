@@ -4,6 +4,7 @@ Dir[File.dirname(__FILE__) + '/lib/*.rb'].each { |file| require file }
 
 ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))['development'])
 
+
 def welcome
   puts "Welcome to the Calendar Manager"
   event_menu
@@ -14,7 +15,7 @@ def event_menu
 
   until choice == 'x'
     puts "Press 'c' to create a new event"
-    puts "Press 'l' to list all events"
+    puts "Press 'l' to view list options"
     puts "Press 'u' to update an event"
     puts "Press 'd' to delete an event"
     puts "Press 'x' to exit"
@@ -46,15 +47,59 @@ def create_event
 end
 
 def list_events_from_menu
-  puts "Here are all of the events:"
-  list_events
-  puts "\n\n"
+  puts "'f' to list all future events"
+  puts "'d' to list all events for today"
+  puts "'w' to list all events for this week"
+  puts "'m' to list all events for this month"
+  puts "'x' to exit"
+  list_preference = prompt("Please enter a choice:")
+
+  case list_preference
+    when 'f' then puts "Here are all of the events:"
+      list_events
+      "\n\n"
+    when 'd' then list_events_by_day
+    when 'w' then list_events_by_week
+    when 'm' then list_events_by_month
+    when 'x' then puts "Bye!"
+    else puts "Please enter a valid choice"
+      list_events_from_menu
+  end
+end
+
+def list_events_by_day
+  t = Time.now
+  current_day = t.day
+  Event.all.order('start ASC').each do |event|
+    if event.start.day == current_day
+      puts "#{event.id}. #{event.description} at #{event.location} starting #{event.display_start} and ending #{event.display_end}"
+    end
+  end
+end
+
+def list_events_by_week
+  t = Time.now
+  current_week = t.strftime("%W")
+  Event.all.order('start ASC').each do |event|
+    if event.start.strftime("%W") == current_week
+      puts "#{event.id}. #{event.description} at #{event.location} starting #{event.display_start} and ending #{event.display_end}"
+    end
+  end
+end
+
+def list_events_by_month
+  t = Time.now
+  current_month = t.month
+  Event.all.order('start ASC').each do |event|
+    if event.start.month == current_month
+      puts "#{event.id}. #{event.description} at #{event.location} starting #{event.display_start} and ending #{event.display_end}"
+    end
+  end
 end
 
 def list_events
-  t = Time.now
   Event.all.order('start ASC').each do |event|
-    if event.start.getlocal > t
+    if event.start > Time.now
       puts "#{event.id}. #{event.description} at #{event.location} starting #{event.display_start} and ending #{event.display_end}"
     end
   end
