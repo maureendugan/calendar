@@ -52,7 +52,12 @@ def list_events_from_menu
 end
 
 def list_events
-  Event.all.each { |event| puts "#{event.id}. #{event.description} at #{event.location} starting #{event.display_start} and ending #{event.display_end}"}
+  t = Time.now
+  Event.all.order('start ASC').each do |event|
+    if event.start.getlocal > t
+      puts "#{event.id}. #{event.description} at #{event.location} starting #{event.display_start} and ending #{event.display_end}"
+    end
+  end
 end
 
 def update_event
