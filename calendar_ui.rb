@@ -3,7 +3,7 @@ Bundler.require(:default)
 Dir[File.dirname(__FILE__) + '/lib/*.rb'].each { |file| require file }
 
 ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))['development'])
-
+I18n.enforce_available_locales = false
 
 def welcome
   puts "Welcome to the Calendar Manager"
@@ -37,13 +37,18 @@ end
 def create_event
   new_description = prompt('Enter event description:')
   new_location = prompt('Enter event location')
-  new_start = prompt('Enter start date and time: YYYY-MM-DD hh:mm')
-  new_end = prompt('Enter end date and time: YYYY-MM-DD hh:mm')
+  new_start = prompt('Enter start date and time:')
+  new_end = prompt('Enter end date and time:')
   new_event = Event.create({  :description => new_description,
                               :location => new_location,
                               :start => new_start,
                               :end => new_end })
-  puts "'#{new_event.description}' has been created\n\n"
+  if new_event.valid?
+    puts "'#{new_event.description}' has been created\n\n"
+  else
+    puts "Your entry was not valid, please try again"
+    create_event
+  end
 end
 
 def list_events_from_menu

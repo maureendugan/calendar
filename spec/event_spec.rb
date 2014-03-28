@@ -28,4 +28,11 @@ describe Event do
       test_event.display_end.should eq 'Saturday March 29, 2014 at 01:30PM'
     end
   end
+  it { should validate_presence_of :description }
+  it 'should validate the description' do
+    Event.create({ :location => "outside", :start => '2014-02-28', :end => '2014-02-28'}).valid?.should eq false
+  end
+  it { should validate_presence_of :location }
+
+
 end
